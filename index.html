@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Prehrana App</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c26;
+    --accent:#00e5a0;--accent2:#ff4d6d;--accent3:#ffd60a;--accent4:#7c6af7;
+    --text:#f0f0f5;--muted:#6b6b80;--border:#2a2a38;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+  .screen{display:none;min-height:100vh;}.screen.active{display:block;}
+
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:500;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:10px 8px 24px;gap:4px;}
+  .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:8px 4px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.3px;text-transform:uppercase;transition:all 0.2s;border-radius:12px;}
+  .nav-btn.active{color:var(--accent);background:rgba(0,229,160,0.08);}
+  .nav-btn:active{transform:scale(0.94);}
+  .nav-icon{font-size:22px;line-height:1;}
+
+  .home-hero{padding:48px 24px 28px;background:linear-gradient(160deg,#0a0a0f 0%,#0f141a 100%);border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+  .home-hero::after{content:'⚽';position:absolute;bottom:-10px;right:20px;font-size:80px;opacity:0.04;}
+  .greeting{font-size:13px;font-weight:500;color:var(--accent3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+  .hero-title{font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:0.95;color:var(--text);letter-spacing:1px;margin-bottom:16px;}
+  .hero-title span{color:var(--accent3);}
+  .day-toggle{display:flex;gap:8px;}
+  .day-btn{flex:1;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center;}
+  .day-btn.active{background:rgba(255,214,10,0.1);border-color:rgba(255,214,10,0.4);color:var(--accent3);}
+  .day-btn.active.trening{background:rgba(0,229,160,0.1);border-color:rgba(0,229,160,0.4);color:var(--accent);}
+
+  .home-content{padding:20px 20px 100px;}
+  .section-label{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+
+  .macro-summary{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:20px;}
+  .macro-summary-title{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--text);margin-bottom:12px;}
+  .macro-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .macro-item{background:var(--surface2);border-radius:10px;padding:12px;}
+  .macro-item.full{grid-column:1/-1;}
+  .macro-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+  .macro-value{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;}
+  .macro-unit{font-size:12px;color:var(--muted);font-weight:500;}
+  .macro-item.kal .macro-value{color:var(--accent3);}
+  .macro-item.pro .macro-value{color:var(--accent);}
+  .macro-item.ug .macro-value{color:var(--accent4);}
+  .macro-item.mast .macro-value{color:var(--accent2);}
+
+  .protein-timing{background:var(--surface);border:1px solid rgba(0,229,160,0.2);border-radius:16px;padding:18px;margin-bottom:20px;}
+  .pt-title{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent);margin-bottom:14px;}
+  .pt-list{display:flex;flex-direction:column;gap:8px;}
+  .pt-item{display:flex;align-items:flex-start;gap:10px;background:var(--surface2);border-radius:10px;padding:10px 12px;}
+  .pt-item.highlight{background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.25);}
+  .pt-time{font-size:13px;font-weight:700;color:var(--accent);min-width:48px;padding-top:1px;}
+  .pt-item.highlight .pt-time{color:var(--accent2);}
+  .pt-desc{flex:1;font-size:12px;color:var(--text);line-height:1.5;}
+  .pt-amount{font-size:11px;font-weight:700;color:var(--muted);background:var(--bg);padding:3px 8px;border-radius:6px;white-space:nowrap;margin-top:1px;}
+
+  /* VODA REMINDER */
+  .voda-reminder{background:rgba(124,106,247,0.08);border:1px solid rgba(124,106,247,0.25);border-radius:14px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;}
+  .voda-icon{font-size:24px;}
+  .voda-text{flex:1;font-size:12px;color:var(--text);line-height:1.6;}
+  .voda-text strong{color:var(--accent4);}
+
+  .meal-cards{display:flex;flex-direction:column;gap:10px;}
+  .meal-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+  .meal-card:active{transform:scale(0.98);}
+  .meal-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+  .meal-card.dorucak::before{background:var(--accent3);}
+  .meal-card.rucak::before{background:var(--accent);}
+  .meal-card.meduobrok::before{background:var(--accent4);}
+  .meal-card.vecera::before{background:var(--accent2);}
+  .meal-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+  .meal-icon-title{display:flex;align-items:center;gap:10px;}
+  .meal-icon{font-size:22px;}
+  .meal-label{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.5px;line-height:1;}
+  .meal-card.dorucak .meal-label{color:var(--accent3);}
+  .meal-card.rucak .meal-label{color:var(--accent);}
+  .meal-card.meduobrok .meal-label{color:var(--accent4);}
+  .meal-card.vecera .meal-label{color:var(--accent2);}
+  .meal-time{font-size:11px;color:var(--muted);background:var(--surface2);padding:3px 9px;border-radius:7px;font-weight:500;}
+  .meal-desc{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5;}
+  .meal-macros{display:flex;gap:6px;flex-wrap:wrap;}
+  .meal-macro-chip{font-size:11px;font-weight:600;padding:3px 9px;border-radius:7px;}
+  .chip-kal{background:rgba(255,214,10,0.12);color:var(--accent3);}
+  .chip-pro{background:rgba(0,229,160,0.12);color:var(--accent);}
+  .chip-ug{background:rgba(124,106,247,0.12);color:var(--accent4);}
+  .chip-mast{background:rgba(255,77,109,0.12);color:var(--accent2);}
+
+  #meal-detail{background:var(--bg);}
+  .detail-header{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;gap:16px;}
+  .back-btn{width:36px;height:36px;border-radius:10px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text);flex-shrink:0;}
+  .back-btn:active{transform:scale(0.92);}
+  .detail-header-info{flex:1;}
+  .detail-header-sub{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}
+  .detail-header-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.5px;line-height:1;}
+  .detail-content{padding:20px 20px 100px;}
+  .target-box{border-radius:14px;padding:14px;margin-bottom:18px;}
+  .target-box.dorucak{background:rgba(255,214,10,0.06);border:1px solid rgba(255,214,10,0.2);}
+  .target-box.rucak{background:rgba(0,229,160,0.06);border:1px solid rgba(0,229,160,0.2);}
+  .target-box.meduobrok{background:rgba(124,106,247,0.06);border:1px solid rgba(124,106,247,0.2);}
+  .target-box.vecera{background:rgba(255,77,109,0.06);border:1px solid rgba(255,77,109,0.2);}
+  .target-title{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;margin-bottom:8px;}
+  .target-box.dorucak .target-title{color:var(--accent3);}
+  .target-box.rucak .target-title{color:var(--accent);}
+  .target-box.meduobrok .target-title{color:var(--accent4);}
+  .target-box.vecera .target-title{color:var(--accent2);}
+  .options-label{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+  .food-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;}
+  .food-card.selected{border-color:rgba(0,229,160,0.4);background:rgba(0,229,160,0.04);}
+  .food-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+  .food-name{font-size:15px;font-weight:600;color:var(--text);flex:1;line-height:1.3;}
+  .food-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;flex-shrink:0;margin-left:10px;transition:all 0.2s;}
+  .food-card.selected .food-check{background:var(--accent);border-color:var(--accent);}
+  .food-card.selected .food-check::after{content:'✓';}
+  .food-portion{font-size:12px;color:var(--muted);margin-bottom:8px;}
+  .food-macros{display:flex;gap:6px;flex-wrap:wrap;}
+  .food-macro{font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;}
+  .food-note{font-size:12px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);line-height:1.5;font-style:italic;}
+
+  #tracker{background:var(--bg);padding-bottom:100px;}
+  .tracker-hero{padding:48px 24px 28px;background:linear-gradient(160deg,#0a0a0f 0%,#0f1a14 100%);border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+  .tracker-hero::after{content:'📊';position:absolute;bottom:-10px;right:20px;font-size:80px;opacity:0.04;}
+  .tracker-content{padding:20px;}
+
+  .score-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;text-align:center;}
+  .score-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+  .score-value{font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:1;margin-bottom:4px;}
+  .score-label{font-size:13px;color:var(--muted);}
+  .score-bar{height:8px;background:var(--surface2);border-radius:4px;margin-top:16px;overflow:hidden;}
+  .score-fill{height:100%;border-radius:4px;transition:width 0.5s ease;}
+
+  .water-card{background:var(--surface);border:1px solid rgba(124,106,247,0.3);border-radius:16px;padding:20px;margin-bottom:20px;}
+  .water-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .water-title{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent4);}
+  .water-count{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--text);}
+  .water-count span{font-size:14px;color:var(--muted);font-family:'DM Sans',sans-serif;}
+  .water-prog-bar{height:6px;background:var(--surface2);border-radius:3px;margin-bottom:14px;overflow:hidden;}
+  .water-prog-fill{height:100%;background:linear-gradient(90deg,var(--accent4),#a78bfa);border-radius:3px;transition:width 0.4s ease;}
+  .water-glasses{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+  .glass{width:46px;height:54px;border-radius:6px 6px 10px 10px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all 0.2s;position:relative;overflow:hidden;}
+  .glass::before{content:'';position:absolute;bottom:0;left:0;right:0;height:0;background:linear-gradient(0deg,rgba(124,106,247,0.6),rgba(124,106,247,0.2));transition:height 0.3s ease;}
+  .glass.filled::before{height:100%;}
+  .glass.filled{border-color:rgba(124,106,247,0.6);}
+  .glass span{position:relative;z-index:1;}
+  .water-info{font-size:12px;color:var(--muted);line-height:1.6;}
+
+  .checklist-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;}
+  .checklist-title{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text);margin-bottom:4px;}
+  .checklist-sub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+  .check-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+  .check-item:last-child{border-bottom:none;padding-bottom:0;}
+  .check-box{width:24px;height:24px;border-radius:7px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+  .check-item.done .check-box{background:var(--accent);border-color:var(--accent);}
+  .check-item.done .check-box::after{content:'✓';font-size:13px;font-weight:700;color:#000;}
+  .check-item.done .check-text{text-decoration:line-through;color:var(--muted);}
+  .check-text{font-size:14px;font-weight:500;color:var(--text);flex:1;line-height:1.4;}
+  .check-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;white-space:nowrap;}
+  .tag-pro{background:rgba(0,229,160,0.15);color:var(--accent);}
+  .tag-voda{background:rgba(124,106,247,0.15);color:var(--accent4);}
+  .tag-supl{background:rgba(255,214,10,0.15);color:var(--accent3);}
+  .tag-trening{background:rgba(255,77,109,0.15);color:var(--accent2);}
+
+  /* SUPPLEMENTS - minimal */
+  #suplementi{background:var(--bg);padding-bottom:100px;}
+  .supl-hero{padding:48px 24px 28px;background:linear-gradient(160deg,#0a0a0f 0%,#1a0f14 100%);border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+  .supl-hero::after{content:'💊';position:absolute;bottom:-10px;right:20px;font-size:80px;opacity:0.04;}
+  .supl-content{padding:20px;}
+  .supl-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.2s;}
+  .supl-item.done{border-color:rgba(0,229,160,0.35);background:rgba(0,229,160,0.04);}
+  .supl-item:active{transform:scale(0.98);}
+  .supl-check{width:26px;height:26px;border-radius:8px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+  .supl-item.done .supl-check{background:var(--accent);border-color:var(--accent);}
+  .supl-item.done .supl-check::after{content:'✓';font-size:14px;font-weight:700;color:#000;}
+  .supl-item.done .supl-name{color:var(--muted);text-decoration:line-through;}
+  .supl-body{flex:1;}
+  .supl-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px;transition:color 0.2s;}
+  .supl-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .supl-when{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--surface2);color:var(--muted);}
+  .supl-dose-tag{font-size:11px;color:var(--muted);}
+  .supl-note{font-size:11px;color:var(--muted);margin-top:6px;font-style:italic;line-height:1.4;}
+  .se-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;}
+  .se-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+  .se-row{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border);}
+  .se-row:last-child{border-bottom:none;padding-bottom:0;}
+  .se-supl{font-size:12px;font-weight:700;min-width:90px;flex-shrink:0;}
+  .se-txt{font-size:12px;color:var(--muted);line-height:1.5;}
+
+  ::-webkit-scrollbar{width:0;}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div class="screen active" id="home">
+  <div class="home-hero">
+    <div class="greeting">Stopar · Pivot · 93kg cilj</div>
+    <div class="hero-title">JELOVNIK<br><span>DANA</span></div>
+    <div class="day-toggle">
+      <button class="day-btn active trening" onclick="setDay('trening',this)">⚡ Dan s treningom</button>
+      <button class="day-btn" onclick="setDay('odmor',this)">😴 Dan odmora</button>
+    </div>
+  </div>
+  <div class="home-content">
+    <div class="section-label">Dnevni cilj — deficit za 93kg</div>
+    <div class="macro-summary">
+      <div class="macro-summary-title" id="summary-title">Dan s treningom</div>
+      <div class="macro-grid">
+        <div class="macro-item kal full"><div class="macro-label">Kalorije</div><div class="macro-value" id="sum-kal">2400 <span class="macro-unit">kcal</span></div></div>
+        <div class="macro-item pro"><div class="macro-label">Proteini</div><div class="macro-value" id="sum-pro">170 <span class="macro-unit">g</span></div></div>
+        <div class="macro-item ug"><div class="macro-label">Ugljikohidrati</div><div class="macro-value" id="sum-ug">250 <span class="macro-unit">g</span></div></div>
+        <div class="macro-item mast"><div class="macro-label">Masti</div><div class="macro-value" id="sum-mast">70 <span class="macro-unit">g</span></div></div>
+      </div>
+    </div>
+
+    <div class="section-label">⚠️ Hidracija — obavezno uz trening</div>
+    <div class="voda-reminder">
+      <div class="voda-icon">💧</div>
+      <div class="voda-text"><strong>Boca 0.5L uz sebe na svakom treningu.</strong> Gutljaj svakih 15 minuta. Na satu treninga gubiš 0.5-1L — bez nadoknade padaju snaga i reakcija na terenu.</div>
+    </div>
+
+    <div class="section-label">Kada piti proteine 💪</div>
+    <div class="protein-timing">
+      <div class="pt-title">PROTEIN TIMING</div>
+      <div class="pt-list" id="pt-list"></div>
+    </div>
+
+    <div class="section-label">Obroci</div>
+    <div class="meal-cards" id="meal-cards"></div>
+  </div>
+</div>
+
+<!-- MEAL DETAIL -->
+<div class="screen" id="meal-detail">
+  <div class="detail-header">
+    <div class="back-btn" onclick="goHome()">←</div>
+    <div class="detail-header-info">
+      <div class="detail-header-sub" id="detail-sub"></div>
+      <div class="detail-header-title" id="detail-title"></div>
+    </div>
+  </div>
+  <div class="detail-content">
+    <div class="target-box" id="target-box">
+      <div class="target-title">CILJANI MAKROI ZA OVAJ OBROK</div>
+      <div class="target-macros" id="target-macros"></div>
+    </div>
+    <div class="options-label">Tvoje opcije — odaberi jelo</div>
+    <div id="food-options"></div>
+  </div>
+</div>
+
+<!-- TRACKER -->
+<div class="screen" id="tracker">
+  <div class="tracker-hero">
+    <div class="greeting">Dnevno praćenje</div>
+    <div class="hero-title" style="font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:0.95;letter-spacing:1px;">TRACKER<br><span style="color:var(--accent);">DANA</span></div>
+  </div>
+  <div class="tracker-content">
+    <div class="section-label">Dnevni score</div>
+    <div class="score-card">
+      <div class="score-title">Koliko si danas odradio</div>
+      <div class="score-value" id="score-val" style="color:var(--accent);">0%</div>
+      <div class="score-label" id="score-label">Označavaj stavke ispod</div>
+      <div class="score-bar"><div class="score-fill" id="score-fill" style="width:0%;background:var(--accent);"></div></div>
+    </div>
+    <div class="section-label">Voda 💧</div>
+    <div class="water-card">
+      <div class="water-header">
+        <div class="water-title">HIDRATACIJA</div>
+        <div class="water-count"><span id="water-ml">0</span><span> / 3000 ml</span></div>
+      </div>
+      <div class="water-prog-bar"><div class="water-prog-fill" id="water-prog" style="width:0%"></div></div>
+      <div class="water-glasses" id="water-glasses"></div>
+      <div class="water-info">Svaka čaša = 300ml · Cilj: 10 čaša = 3L · Uz trening boca 0.5L extra</div>
+    </div>
+    <div class="section-label">Dnevni checklist</div>
+    <div class="checklist-card">
+      <div class="checklist-title">Što si odradio danas?</div>
+      <div class="checklist-sub">Jednostavne kvačice — bez stresa, bez unosa kalorija</div>
+      <div id="checklist"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SUPLEMENTI -->
+<div class="screen" id="suplementi">
+  <div class="supl-hero">
+    <div class="greeting">Označi što si uzeo danas</div>
+    <div class="hero-title" style="font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:0.95;letter-spacing:1px;">SUPLEMEN<br><span style="color:var(--accent2);">TI</span></div>
+  </div>
+  <div class="supl-content">
+    <div class="section-label">Dnevni tracker</div>
+    <div id="supl-list"></div>
+
+    <div class="section-label" style="margin-top:4px;">Nuspojave — kratko</div>
+    <div class="se-card">
+      <div class="se-title">Što može se dogoditi</div>
+      <div class="se-row"><div class="se-supl" style="color:var(--accent);">Kreatin</div><div class="se-txt">1-2kg vode u mišićima prvotno. Blagi GI ako uzmeš na prazan stomak.</div></div>
+      <div class="se-row"><div class="se-supl" style="color:var(--accent3);">D3 + K2</div><div class="se-txt">Mučnina na prazan stomak — uvijek uz obrok s mastima (avokado, orasi).</div></div>
+      <div class="se-row"><div class="se-supl" style="color:var(--accent4);">Omega-3</div><div class="se-txt">Ribji okus, blagi proljev. Čuvaj u hladnjaku, uzmi uz obrok.</div></div>
+      <div class="se-row"><div class="se-supl" style="color:var(--accent);">Magnezij</div><div class="se-txt">Pospanost navečer (željeni efekt). Laksativ pri previsokoj dozi — počni s 200mg.</div></div>
+      <div class="se-row"><div class="se-supl" style="color:var(--accent3);">Whey</div><div class="se-txt">Nadutost moguća. Ako imaš problema — prijeđi na isolate (manje laktoze).</div></div>
+      <div class="se-row"><div class="se-supl" style="color:var(--accent2);">OsteoBiflex</div><div class="se-txt">GI tegobe na prazan stomak. Efekt tek nakon 2-3 mjeseca — ne odustaj ranije.</div></div>
+    </div>
+    <div style="background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.2);border-radius:12px;padding:14px;font-size:12px;color:var(--muted);line-height:1.6;">
+      ⚠️ Konzultiraj liječnika prije uvođenja novih suplemenata uz post-op status.
+    </div>
+  </div>
+</div>
+
+<!-- KALENDAR -->
+<div class="screen" id="kalendar">
+  <div class="home-hero" style="background:linear-gradient(160deg,#0a0a0f 0%,#0a0f1a 100%);">
+    <div class="greeting">Dnevnik prehrane</div>
+    <div class="hero-title" style="font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:0.95;letter-spacing:1px;">KALEN<br><span style="color:var(--accent4);">DAR</span></div>
+  </div>
+  <div style="padding:20px 20px 100px;">
+
+    <!-- SETUP BANNER -->
+    <div id="setup-banner" style="background:rgba(124,106,247,0.08);border:1px solid rgba(124,106,247,0.3);border-radius:16px;padding:18px;margin-bottom:20px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent4);margin-bottom:8px;">🔧 POSTAVLJANJE — jednom</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;">Zalijepis tvoj Google Apps Script URL ispod da se podaci spremu u Google Sheets.</div>
+      <input id="sheets-url" type="url" placeholder="https://script.google.com/macros/s/..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;margin-bottom:10px;outline:none;">
+      <button onclick="saveUrl()" style="width:100%;background:var(--accent4);border:none;border-radius:10px;padding:12px;color:#fff;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;">Spremi URL</button>
+    </div>
+
+    <!-- MONTH NAV -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <button onclick="changeMonth(-1)" style="width:36px;height:36px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:18px;cursor:pointer;">‹</button>
+      <div id="month-label" style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--text);letter-spacing:1px;"></div>
+      <button onclick="changeMonth(1)" style="width:36px;height:36px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:18px;cursor:pointer;">›</button>
+    </div>
+
+    <!-- CALENDAR GRID -->
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;">
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding:4px;">Pon</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding:4px;">Uto</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding:4px;">Sri</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding:4px;">Čet</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding:4px;">Pet</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding:4px;">Sub</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding:4px;">Ned</div>
+    </div>
+    <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:20px;"></div>
+
+  </div>
+</div>
+
+<!-- DAY DETAIL MODAL -->
+<div id="day-modal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.7);align-items:flex-end;">
+  <div style="background:var(--surface);border-radius:24px 24px 0 0;padding:24px 20px 40px;width:100%;max-height:85vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div id="modal-date" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent4);letter-spacing:0.5px;"></div>
+      <button onclick="closeModal()" style="width:32px;height:32px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:16px;cursor:pointer;">✕</button>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Tip dana</div>
+    <div style="display:flex;gap:8px;margin-bottom:20px;">
+      <button id="btn-trening" onclick="setDayType('trening')" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;">⚡ Trening</button>
+      <button id="btn-odmor" onclick="setDayType('odmor')" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;">😴 Odmor</button>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Što sam jeo</div>
+    <div id="meal-inputs"></div>
+
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Bilješka</div>
+    <textarea id="day-note" placeholder="Osjećaj, energija, nešto posebno..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;resize:none;height:80px;outline:none;margin-bottom:20px;"></textarea>
+
+    <button onclick="saveDay()" id="save-btn" style="width:100%;background:var(--accent4);border:none;border-radius:14px;padding:16px;color:#fff;font-size:16px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;">💾 Spremi u Google Sheets</button>
+    <div id="save-status" style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px;min-height:18px;"></div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="showScreen('home')"><span class="nav-icon">🥗</span>Jelovnik</button>
+  <button class="nav-btn" id="nav-tracker" onclick="showScreen('tracker')"><span class="nav-icon">📊</span>Tracker</button>
+  <button class="nav-btn" id="nav-suplementi" onclick="showScreen('suplementi')"><span class="nav-icon">💊</span>Supl.</button>
+  <button class="nav-btn" id="nav-kalendar" onclick="showScreen('kalendar')"><span class="nav-icon">📅</span>Kalendar</button>
+</div>
+
+<script>
+const PT = {
+  trening:[
+    {time:'7:00', desc:'Doručak — overnight oats s kravljim mlijekom ili avokado tost', amount:'30-35g', hi:false},
+    {time:'12:30', desc:'Ručak — meso ili riba + riža + povrće', amount:'50-55g', hi:false},
+    {time:'17:00', desc:'🔴 PRE-TRENING — banana + proteinska čokoladica ili skyr (obavezno!)', amount:'25-30g', hi:true},
+    {time:'20:30', desc:'🔴 POST-TRENING — whey shake ODMAH, ne čekaj ni 5 minuta', amount:'30g', hi:true},
+    {time:'21:00', desc:'Večera — ostatci ručka, više mesa i povrća, upola manje riže', amount:'45-50g', hi:false},
+  ],
+  odmor:[
+    {time:'7:30', desc:'Doručak — overnight oats s kravljim mlijekom ili avokado tost', amount:'30-35g', hi:false},
+    {time:'13:00', desc:'Ručak — meso ili riba + riža + povrće', amount:'50-55g', hi:false},
+    {time:'16:30', desc:'Međuobrok — skyr ili proteinska čokoladica (kad si gladan)', amount:'25-28g', hi:false},
+    {time:'20:00', desc:'Večera — ostatci ručka, više mesa i povrća, upola manje riže', amount:'45-50g', hi:false},
+  ]
+};
+
+const CL = {
+  trening:[
+    {text:'OsteoBiflex uz doručak', tag:'suplement', cls:'tag-supl'},
+    {text:'D3+K2 uz doručak (uz masti)', tag:'suplement', cls:'tag-supl'},
+    {text:'Kreatin 5g uz obrok', tag:'suplement', cls:'tag-supl'},
+    {text:'Omega-3 uz obrok', tag:'suplement', cls:'tag-supl'},
+    {text:'Boca vode 0.5L uz trening', tag:'voda', cls:'tag-voda'},
+    {text:'3L vode kroz dan', tag:'voda', cls:'tag-voda'},
+    {text:'Magnezij navečer', tag:'suplement', cls:'tag-supl'},
+    {text:'Trening odrađen ✓', tag:'trening', cls:'tag-trening'},
+  ],
+  odmor:[
+    {text:'OsteoBiflex uz doručak', tag:'suplement', cls:'tag-supl'},
+    {text:'D3+K2 uz doručak (uz masti)', tag:'suplement', cls:'tag-supl'},
+    {text:'Kreatin 5g uz obrok', tag:'suplement', cls:'tag-supl'},
+    {text:'Omega-3 uz obrok', tag:'suplement', cls:'tag-supl'},
+    {text:'3L vode kroz dan', tag:'voda', cls:'tag-voda'},
+    {text:'Magnezij navečer', tag:'suplement', cls:'tag-supl'},
+    {text:'Aktivan odmor — šetnja 20-30 min', tag:'aktivnost', cls:'tag-trening'},
+  ]
+};
+
+const DAYS = {
+  trening:{
+    label:'Dan s treningom', totals:{kal:2400,pro:170,ug:250,mast:70},
+    meals:[
+      {id:'dorucak',type:'dorucak',icon:'🌅',label:'Doručak',time:'7:00–8:00',
+       desc:'Visoki proteini za start. Ne preskačeš — tijelo treba gorivo. Bademovo mlijeko zamijeni kravljim — +8g proteina odmah.',
+       targets:{kal:500,pro:32,ug:52,mast:15},
+       options:[
+        {name:'Overnight Oats — tvoj recept (optimiziran)',portion:'60g zobenih pahuljica + 1 žlica chia + 150ml KRAVLJEG mlijeka + 100g skyra + žlica meda + šumsko voće',kal:490,pro:28,ug:62,mast:10,note:'Ključna promjena: kravlje umjesto bademovog mlijeka. Isti okus, +8g proteina. Skyr dodaje još 10g. Pripremi večer prije — ujutro je spreman.'},
+        {name:'Overnight Oats pojačani',portion:'60g zobenih + chia + 150ml mlijeka + 150g skyra + banana + žlica kikiriki maslaca',kal:545,pro:34,ug:68,mast:14,note:'Kikiriki maslac dodaje zdrave masti i proteina. Verzija za dugo jutro ili dan s jutarnjim treningom.'},
+        {name:'Avokado tost — tvoj recept',portion:'2 integralna tosta + 2 jaja + pola avokada (gnječen sa začinima) + ABC sir + pureća šunka',kal:520,pro:35,ug:32,mast:26,note:'Jedina promjena: integralni umjesto bijelog kruha — sporija digestija, dulje sito. Imaš već 35g proteina — odličan doručak.'},
+        {name:'Avokado tost + skyr sa strane',portion:'2 integralna tosta + 2 jaja + avokado + šunka + ABC sir + 100g skyra',kal:570,pro:42,ug:36,mast:24,note:'Skyr sa strane gura proteina na 42g. Idealno za jutro pred dug radni dan za kompom.'},
+        {name:'Skyr bowl — quick prep',portion:'250g skyr + 1 banana + 25g oraha + žlica meda',kal:460,pro:30,ug:52,mast:14,note:'Kad nema vremena ni za oats. 3 minute prep, solidni proteini, ništa za kuhati. Rezervna opcija.'},
+       ]},
+      {id:'rucak',type:'rucak',icon:'☀️',label:'Ručak',time:'12:30–13:30',
+       desc:'Najveći obrok dana. Uvijek: meso ili riba + ugljikohidrat + povrće. Kuhajte za 2 dana odjednom.',
+       targets:{kal:720,pro:55,ug:80,mast:18},
+       options:[
+        {name:'Piletina + riža + povrće',portion:'200g piletina + 100g riže suhe (=250g kuhane) + 200g povrća + maslinovo ulje',kal:700,pro:56,ug:82,mast:14,note:'Klasik koji radi. Kuhate jednom — jedete dva dana. Povrća neograničeno. Ovo je default ručak.'},
+        {name:'Losos + riža + cikla',portion:'200g losos + 100g riže + 150g cikle + salata',kal:740,pro:52,ug:72,mast:28,note:'Omega-3 iz lososa direktno smanjuje upalu u tetivi i koljenu. Jednom tjedno minimum — ovo je lijek, ne samo hrana.'},
+        {name:'Rižoto s piletinom',portion:'120g arborio riže + 180g piletine + povrće + malo parmezana',kal:720,pro:50,ug:80,mast:18,note:'Pazi na maslac — rižoto je kalorijski gust. Parmezan = bonus proteini i okus. Jednom tjedno.'},
+        {name:'Zdrave tortilje s piletinom',portion:'2 integralne tortilje + 180g piletine + povrće + grčki jogurt umjesto vrhnja',kal:680,pro:52,ug:62,mast:18,note:'Grčki jogurt umjesto kiselog vrhnja — isti okus, manje masti, više proteina. Brza priprema.'},
+        {name:'Ramstek + povrće u rerni',portion:'200g ramstek + 300g povrća u rerni + kriška integralnog kruha',kal:700,pro:54,ug:40,mast:28,note:'Crveno meso 2-3x tjedno — kreatin i kolagen za oporavak koljena. Rerna je zdrava priprema.'},
+        {name:'Bolonjez tjestenina (optimiziran)',portion:'120g integralne tjestenine + 180g mljevene govedine + umak od rajčice',kal:720,pro:50,ug:72,mast:22,note:'Integralna tjestenina je ključna — sporija digestija. 180g mesa minimum. Kolagen iz govedine bonus za koljeno.'},
+       ]},
+      {id:'meduobrok',type:'meduobrok',icon:'⚡',label:'Pre-trening obrok',time:'17:00–17:30',
+       desc:'Obavezan na dane s večernjim treningom. 45-60 min prije. Lagano — ne puniti stomak. Boca vode uz trening!',
+       targets:{kal:300,pro:28,ug:32,mast:7},
+       options:[
+        {name:'Banana + proteinska čokoladica',portion:'1 banana + 1 proteinska čokoladica (Grenade ili MaxProtein)',kal:290,pro:24,ug:38,mast:7,note:'Default pre-trening opcija. Brza energija iz banane + proteini iz čokoladice. Provjeri etiketu: min 20g pro, max 10g šećera.'},
+        {name:'Whey shake + banana',portion:'1 mjera whey proteina (300ml vode) + 1 banana',kal:310,pro:32,ug:40,mast:4,note:'Ako imaš shaker sa sobom. Whey se brzo apsorbira — idealan 45 min prije treninga.'},
+        {name:'Skyr + banana',portion:'150g skyr + 1 banana + 15g oraha',kal:330,pro:26,ug:42,mast:10,note:'Sporija apsorpcija — uzmi 70 min prije, ne 45. Ako ideš ranije iz ureda ovo je dobra opcija.'},
+        {name:'2 jaja tvrdo + 2 rižina kolača',portion:'2 jaja + 2 rižina kolača + žlica kikiriki maslaca',kal:320,pro:20,ug:30,mast:14,note:'Skuhaš ujutro i poneseš sa sobom. Ako uzmeš ovo, dodaj proteinski shake odmah po dolasku na trening.'},
+       ]},
+      {id:'vecera',type:'vecera',icon:'🌙',label:'Večera (Post-trening)',time:'21:00–21:30',
+       desc:'Whey shake ODMAH po treningu — ne čekaj. Za 30-45 min pravi obrok. Ostatci ručka — više mesa, upola manje riže.',
+       targets:{kal:560,pro:50,ug:40,mast:18},
+       options:[
+        {name:'Ostatci ručka (prilagođeni) — default',portion:'Ista hrana kao ručak — uzmi više mesa i povrća, upola manje riže ili tjestenine',kal:540,pro:50,ug:38,mast:16,note:'Najefikasnija opcija — kuhate jednom, jedete dva puta. Manje ugljikohidrata navečer jer ih nisi trošio sjedenjem na poslu.'},
+        {name:'Piletina s batatom i brokulom',portion:'200g piletina + 150g batata + 200g brokule',kal:560,pro:52,ug:48,mast:10,note:'Batat = bolji ugljikohidrat za noć od bijele riže — sporija digestija. Brokula ima vitamin C za sintezu kolagena — direktna korist za koljeno.'},
+        {name:'Losos s povrćem',portion:'200g losos + 300g miješanog povrća + maslinovo ulje',kal:540,pro:48,ug:14,mast:30,note:'Omega-3 rade dok spavaš. Low-carb večera ako si dobro jeo danju. Brza priprema — 15 minuta u rerni.'},
+        {name:'Cottage cheese s povrćem',portion:'300g cottage cheese + kuhano povrće + maslinovo ulje',kal:480,pro:48,ug:16,mast:18,note:'Kazein iz cottage sira se polako oslobađa noću — optimalno za oporavak mišića i regeneraciju koljena dok spavaš.'},
+       ]},
+    ]
+  },
+  odmor:{
+    label:'Dan odmora', totals:{kal:2000,pro:165,ug:180,mast:65},
+    meals:[
+      {id:'dorucak',type:'dorucak',icon:'🌅',label:'Doručak',time:'7:30–8:30',
+       desc:'Nema treninga — malo manji ugljikohidrati. Fokus na proteine i zdrave masti. Nema žurbe.',
+       targets:{kal:450,pro:30,ug:40,mast:16},
+       options:[
+        {name:'Overnight Oats (manji)',portion:'50g zobenih + chia + 150ml kravljeg mlijeka + 150g skyra + šumsko voće',kal:440,pro:30,ug:52,mast:9,note:'Malo manje zobenih nego na dan treninga — nema potrebe za toliko energije. Skyr na 150g za više proteina.'},
+        {name:'Avokado tost — tvoj recept',portion:'2 integralna tosta + 2 jaja + pola avokada + ABC sir + pureća šunka',kal:520,pro:35,ug:32,mast:26,note:'Na dan odmora avokado tost je idealan — zdrave masti drže sito cijelo jutro bez potrebe za puno ugljikohidrata.'},
+        {name:'Omlet s povrćem i šunkom',portion:'2 jaja + miješano povrće + pureća šunka + 2 kriške integralnog kruha',kal:430,pro:30,ug:30,mast:16,note:'Na dan odmora imaš vremena kuhati. Dodaj ABC sir za više proteina i kalcija.'},
+        {name:'Skyr bowl',portion:'250g skyr + 25g oraha + žlica meda + bobičasto voće',kal:400,pro:30,ug:36,mast:14,note:'Najbrži doručak. 3 minute, nula kuhanja. Rezervna opcija za lijenu nedjelju.'},
+       ]},
+      {id:'rucak',type:'rucak',icon:'☀️',label:'Ručak',time:'12:30–13:30',
+       desc:'Isti princip — meso ili riba + ugljikohidrat + povrće. Malo manje UG nego na dan treninga.',
+       targets:{kal:650,pro:52,ug:65,mast:20},
+       options:[
+        {name:'Losos + cikla + riža',portion:'200g losos + 150g cikle + 80g riže + salata',kal:660,pro:50,ug:60,mast:26,note:'Na dan odmora masna riba je idealna — omega-3 rade regeneraciju zgloba i tetive. Cikla poboljšava cirkulaciju.'},
+        {name:'Piletina + riža + povrće',portion:'200g piletina + 80g riže suhe + neograničeno povrće',kal:620,pro:54,ug:65,mast:12,note:'Manje riže nego na dan treninga. Povrča koliko hoćeš — vlaknasta hrana = sitost bez kalorija.'},
+        {name:'Ramstek + povrće u rerni',portion:'180g ramstek + 300g povrća + kriška kruha',kal:640,pro:50,ug:30,mast:28,note:'Crveno meso + regenerativni dan = odlična kombinacija. Kolagen iz govedine za zglobove dok odmara.'},
+        {name:'Tuna salata s kvinojom',portion:'2 konzerve tune + 90g kvinoje + maslinovo ulje + povrće',kal:630,pro:58,ug:55,mast:18,note:'Brza priprema bez kuhanja mesa. Maslinovo ulje je antiupalno. Kvinoja ima sve esencijalne aminokiseline.'},
+       ]},
+      {id:'meduobrok',type:'meduobrok',icon:'🫐',label:'Međuobrok',time:'16:00–17:00',
+       desc:'Bez treninga — manji obrok kad si gladan. Popunjavaš dnevni proteinski cilj.',
+       targets:{kal:250,pro:24,ug:20,mast:9},
+       options:[
+        {name:'Skyr s bobičastim voćem',portion:'200g skyr + šaka borovina ili jagoda',kal:230,pro:28,ug:24,mast:2,note:'Antioksidansi iz bobičastog voća + proteini iz skyra. Default međuobrok za dan odmora.'},
+        {name:'Proteinska čokoladica',portion:'1 proteinska čokoladica (Grenade ili MaxProtein)',kal:240,pro:22,ug:20,mast:8,note:'Najbrža opcija kad si u pokretu. Min 20g proteina, max 10g šećera na etiketi.'},
+        {name:'Jabuka + kikiriki maslac + skyr',portion:'1 jabuka + žlica kikiriki maslaca + 100g skyra',kal:270,pro:16,ug:28,mast:10,note:'Vlakna + zdrave masti + proteini = dulje sito. Dobra kombinacija za popodne.'},
+        {name:'Cottage cheese s krastavcima',portion:'200g cottage cheese + krastavac + sol',kal:220,pro:26,ug:8,mast:8,note:'Nisko kalorično, visoko proteinsko. Idealno kad si u deficitu i nećeš previše jesti.'},
+       ]},
+      {id:'vecera',type:'vecera',icon:'🌙',label:'Večera',time:'19:30–20:30',
+       desc:'Dan odmora = manje UG navečer. Ostatci ručka s više mesa i povrća, upola manje riže.',
+       targets:{kal:480,pro:48,ug:28,mast:20},
+       options:[
+        {name:'Ostatci ručka (prilagođeni) — default',portion:'Ista hrana kao ručak — više mesa i povrća, upola manje riže',kal:460,pro:48,ug:28,mast:16,note:'Najlakša i najpametnija opcija. Dan odmora = manje UG navečer. Isti tanjur, drugačija proporcija.'},
+        {name:'Skuša ili sardine s povrćem',portion:'2 konzerve skuše + 300g povrća + maslinovo ulje',kal:480,pro:46,ug:12,mast:28,note:'Omega-3 rade dok spavaš. Skuša je jeftina i nutritivno vrhunska. Brza priprema.'},
+        {name:'Piletina s avokadom i salatom',portion:'200g piletina + pola avokada + zelena salata + maslinovo ulje',kal:500,pro:50,ug:10,mast:30,note:'Low carb večera. Avokado + maslinovo ulje = zdrave masti za regeneraciju. Minimalno kuhanje.'},
+        {name:'Cottage cheese s orasima',portion:'300g cottage cheese + 20g oraha + žlica meda',kal:440,pro:46,ug:18,mast:18,note:'Kazein + zdrave masti = optimalna noćna kombinacija za oporavak mišića i koljena dok spavaš.'},
+       ]},
+    ]
+  }
+};
+
+let currentDay='trening',currentMeal=null,selectedFoods={},waterCount=0,checkDone=new Set();
+
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(n).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-'+n).classList.add('active');
+  window.scrollTo(0,0);
+  if(n==='tracker') renderTracker();
+}
+function goHome(){showScreen('home');}
+
+function setDay(day,btn){
+  currentDay=day;
+  document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active','trening'));
+  btn.classList.add('active');
+  if(day==='trening') btn.classList.add('trening');
+  const d=DAYS[day];
+  document.getElementById('summary-title').textContent=d.label;
+  document.getElementById('sum-kal').innerHTML=d.totals.kal+' <span class="macro-unit">kcal</span>';
+  document.getElementById('sum-pro').innerHTML=d.totals.pro+' <span class="macro-unit">g</span>';
+  document.getElementById('sum-ug').innerHTML=d.totals.ug+' <span class="macro-unit">g</span>';
+  document.getElementById('sum-mast').innerHTML=d.totals.mast+' <span class="macro-unit">g</span>';
+  renderPT(); renderMeals();
+}
+
+function renderPT(){
+  document.getElementById('pt-list').innerHTML=PT[currentDay].map(i=>
+    `<div class="pt-item${i.hi?' highlight':''}">
+      <div class="pt-time">${i.time}</div>
+      <div class="pt-desc">${i.desc}</div>
+      <div class="pt-amount">${i.amount}</div>
+    </div>`
+  ).join('');
+}
+
+function renderMeals(){
+  const c=document.getElementById('meal-cards');c.innerHTML='';
+  DAYS[currentDay].meals.forEach(m=>{
+    const el=document.createElement('div');
+    el.className=`meal-card ${m.type}`;el.onclick=()=>openMeal(m);
+    el.innerHTML=`
+      <div class="meal-top">
+        <div class="meal-icon-title"><div class="meal-icon">${m.icon}</div><div class="meal-label">${m.label}</div></div>
+        <div class="meal-time">${m.time}</div>
+      </div>
+      <div class="meal-desc">${m.desc}</div>
+      <div class="meal-macros">
+        <span class="meal-macro-chip chip-kal">🔥 ${m.targets.kal} kcal</span>
+        <span class="meal-macro-chip chip-pro">💪 ${m.targets.pro}g pro</span>
+        <span class="meal-macro-chip chip-ug">⚡ ${m.targets.ug}g ug</span>
+        <span class="meal-macro-chip chip-mast">🥑 ${m.targets.mast}g mast</span>
+      </div>`;
+    c.appendChild(el);
+  });
+}
+
+function openMeal(m){
+  currentMeal=m;
+  document.getElementById('detail-sub').textContent=DAYS[currentDay].label;
+  document.getElementById('detail-title').textContent=m.icon+' '+m.label;
+  const tb=document.getElementById('target-box');tb.className=`target-box ${m.type}`;
+  document.getElementById('target-macros').innerHTML=`
+    <span class="meal-macro-chip chip-kal">🔥 ${m.targets.kal} kcal</span>
+    <span class="meal-macro-chip chip-pro">💪 ${m.targets.pro}g proteina</span>
+    <span class="meal-macro-chip chip-ug">⚡ ${m.targets.ug}g ugljikohidrata</span>
+    <span class="meal-macro-chip chip-mast">🥑 ${m.targets.mast}g masti</span>`;
+  const key=currentDay+'_'+m.id,sel=selectedFoods[key];
+  const c=document.getElementById('food-options');c.innerHTML='';
+  m.options.forEach((f,i)=>{
+    const el=document.createElement('div');
+    el.className='food-card'+(sel===i?' selected':'');el.onclick=()=>selFood(i,key);
+    el.innerHTML=`
+      <div class="food-top"><div class="food-name">${f.name}</div><div class="food-check"></div></div>
+      <div class="food-portion">📦 ${f.portion}</div>
+      <div class="food-macros">
+        <span class="food-macro chip-kal">🔥 ${f.kal} kcal</span>
+        <span class="food-macro chip-pro">💪 ${f.pro}g pro</span>
+        <span class="food-macro chip-ug">⚡ ${f.ug}g ug</span>
+        <span class="food-macro chip-mast">🥑 ${f.mast}g mast</span>
+      </div>
+      ${f.note?`<div class="food-note">💡 ${f.note}</div>`:''}`;
+    c.appendChild(el);
+  });
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('meal-detail').classList.add('active');
+  window.scrollTo(0,0);
+}
+function selFood(i,key){
+  selectedFoods[key]=selectedFoods[key]===i?undefined:i;
+  document.querySelectorAll('.food-card').forEach((c,j)=>c.classList.toggle('selected',selectedFoods[key]===j));
+}
+
+function renderTracker(){renderWater();renderChecklist();}
+
+function renderWater(){
+  const c=document.getElementById('water-glasses');c.innerHTML='';
+  for(let i=0;i<10;i++){
+    const g=document.createElement('div');
+    g.className='glass'+(i<waterCount?' filled':'');
+    g.onclick=()=>{waterCount=waterCount===i+1?i:i+1;renderWater();};
+    g.innerHTML=`<span>${i<waterCount?'💧':'○'}</span>`;
+    c.appendChild(g);
+  }
+  document.getElementById('water-ml').textContent=waterCount*300;
+  document.getElementById('water-prog').style.width=(waterCount/10*100)+'%';
+  updateScore();
+}
+
+function renderChecklist(){
+  const items=CL[currentDay],c=document.getElementById('checklist');c.innerHTML='';
+  items.forEach((item,i)=>{
+    const el=document.createElement('div');
+    el.className='check-item'+(checkDone.has(i)?' done':'');
+    el.onclick=()=>{checkDone.has(i)?checkDone.delete(i):checkDone.add(i);renderChecklist();updateScore();};
+    el.innerHTML=`<div class="check-box"></div><div class="check-text">${item.text}</div><span class="check-tag ${item.cls}">${item.tag}</span>`;
+    c.appendChild(el);
+  });
+  updateScore();
+}
+
+function updateScore(){
+  const items=CL[currentDay];
+  const total=items.length+1,done=checkDone.size+(waterCount>=10?1:0);
+  const pct=Math.round(done/total*100);
+  document.getElementById('score-val').textContent=pct+'%';
+  const fill=document.getElementById('score-fill');
+  let color,label;
+  if(pct<40){color='var(--accent2)';label='Tek počinješ — hajde! 💪';}
+  else if(pct<70){color='var(--accent3)';label='Dobar napredak, nastavi!';}
+  else if(pct<100){color='var(--accent)';label='Odlično, skoro si tu!';}
+  else{color='var(--accent)';label='🏆 Savršen dan! Bravo!';}
+  document.getElementById('score-val').style.color=color;
+  fill.style.width=pct+'%';fill.style.background=color;
+  document.getElementById('score-label').textContent=label;
+}
+
+renderPT();renderMeals();
+
+// ─── SUPPLEMENTS ────────────────────────────────────────
+const SUPLS = [
+  {id:'osteobiflex', name:'OsteoBiflex', when:'Ujutro uz doručak', dose:'Po uputi', color:'var(--accent2)', note:'Uz hranu — ne na prazan stomak'},
+  {id:'d3k2',        name:'Vitamin D3 + K2', when:'Ujutro uz doručak', dose:'2000-4000 IU', color:'var(--accent3)', note:'Uz obrok koji ima masti — avokado, orasi'},
+  {id:'kreatin',     name:'Kreatin Monohidrat', when:'Bilo koji obrok', dose:'5g', color:'var(--accent)', note:'Svaki dan bez iznimke, i na dane odmora'},
+  {id:'omega3',      name:'Omega-3 Riblje Ulje', when:'Uz obrok', dose:'2-3g EPA+DHA', color:'var(--accent4)', note:'Čuvaj u hladnjaku'},
+  {id:'whey',        name:'Whey Protein', when:'Odmah post-trening', dose:'30g', color:'var(--accent)', note:'Ne čekaj — odmah nakon, s vodom'},
+  {id:'magnezij',    name:'Magnezij Bisglicinat', when:'Navečer', dose:'300-400mg', color:'var(--accent)', note:'1 sat prije spavanja'},
+];
+
+let suplDone = new Set();
+
+function renderSupl(){
+  const c = document.getElementById('supl-list'); c.innerHTML='';
+  SUPLS.forEach(s=>{
+    const el = document.createElement('div');
+    el.className = 'supl-item'+(suplDone.has(s.id)?' done':'');
+    el.onclick = ()=>{suplDone.has(s.id)?suplDone.delete(s.id):suplDone.add(s.id); renderSupl();};
+    el.innerHTML=`
+      <div class="supl-check"></div>
+      <div class="supl-body">
+        <div class="supl-name">${s.name}</div>
+        <div class="supl-meta">
+          <span class="supl-when">${s.when}</span>
+          <span class="supl-dose-tag">${s.dose}</span>
+        </div>
+        <div class="supl-note">${s.note}</div>
+      </div>`;
+    c.appendChild(el);
+  });
+}
+
+// ─── CALENDAR ───────────────────────────────────────────
+const MONTHS_HR = ['Siječanj','Veljača','Ožujak','Travanj','Svibanj','Lipanj','Srpanj','Kolovoz','Rujan','Listopad','Studeni','Prosinac'];
+const MEAL_LABELS = ['🌅 Doručak','☀️ Ručak','⚡ Međuobrok','🌙 Večera'];
+let calYear, calMonth, activeDay=null, activeDayType='trening';
+let calCache = {}; // date string -> {type, meals, note}
+let sheetsUrl = localStorage.getItem('sheetsUrl') || '';
+
+function initCalendar(){
+  const now = new Date();
+  if(!calYear) { calYear = now.getFullYear(); calMonth = now.getMonth(); }
+  if(sheetsUrl) document.getElementById('setup-banner').style.display='none';
+  loadLocalData();
+  renderCal();
+}
+
+function loadLocalData(){
+  try {
+    const saved = localStorage.getItem('prehrana_cal');
+    if(saved) calCache = JSON.parse(saved);
+  } catch(e){}
+}
+
+function saveLocalData(){
+  try { localStorage.setItem('prehrana_cal', JSON.stringify(calCache)); } catch(e){}
+}
+
+function saveUrl(){
+  const url = document.getElementById('sheets-url').value.trim();
+  if(!url){ alert('Zalijepis URL!'); return; }
+  sheetsUrl = url;
+  localStorage.setItem('sheetsUrl', url);
+  document.getElementById('setup-banner').style.display='none';
+  renderCal();
+}
+
+function changeMonth(dir){
+  calMonth += dir;
+  if(calMonth > 11){ calMonth=0; calYear++; }
+  if(calMonth < 0){ calMonth=11; calYear--; }
+  renderCal();
+}
+
+function renderCal(){
+  document.getElementById('month-label').textContent = MONTHS_HR[calMonth]+' '+calYear;
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML='';
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const offset = firstDay===0?6:firstDay-1;
+  const today = new Date();
+
+  for(let i=0;i<offset;i++){
+    const blank=document.createElement('div');
+    blank.style.cssText='height:44px;';
+    grid.appendChild(blank);
+  }
+  for(let d=1;d<=daysInMonth;d++){
+    const key=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const data=calCache[key];
+    const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
+    const cell=document.createElement('div');
+    const hasMeals=data&&data.meals&&data.meals.some(m=>m);
+    cell.style.cssText=`height:44px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;border:1px solid ${isToday?'rgba(124,106,247,0.6)':hasMeals?'rgba(0,229,160,0.3)':'var(--border)'};background:${hasMeals?'rgba(0,229,160,0.06)':isToday?'rgba(124,106,247,0.08)':'var(--surface)'};`;
+    cell.innerHTML=`<span style="font-size:14px;font-weight:${isToday?'700':'500'};color:${isToday?'var(--accent4)':hasMeals?'var(--accent)':'var(--text)'};">${d}</span>${data&&data.type?`<span style="font-size:8px;color:var(--muted);">${data.type==='trening'?'⚡':'😴'}</span>`:''}`;
+    cell.onclick=()=>openDay(key,d);
+    grid.appendChild(cell);
+  }
+}
+
+function openDay(key, d){
+  activeDay=key;
+  const data=calCache[key]||{type:'trening',meals:['','','',''],note:''};
+  document.getElementById('modal-date').textContent=`${d}. ${MONTHS_HR[calMonth]} ${calYear}`;
+  setDayType(data.type||'trening');
+  const mi=document.getElementById('meal-inputs');
+  mi.innerHTML='';
+  MEAL_LABELS.forEach((lbl,i)=>{
+    mi.innerHTML+=`<div style="margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;">${lbl}</div>
+      <input id="meal-${i}" value="${(data.meals&&data.meals[i])||''}" placeholder="Što si jeo..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+    </div>`;
+  });
+  document.getElementById('day-note').value=data.note||'';
+  const modal=document.getElementById('day-modal');
+  modal.style.display='flex';
+  setTimeout(()=>modal.style.opacity='1',10);
+}
+
+function setDayType(type){
+  activeDayType=type;
+  const bt=document.getElementById('btn-trening');
+  const bo=document.getElementById('btn-odmor');
+  if(type==='trening'){
+    bt.style.cssText='flex:1;padding:10px;border-radius:10px;border:1px solid rgba(0,229,160,0.4);background:rgba(0,229,160,0.1);color:var(--accent);font-family:"DM Sans",sans-serif;font-size:13px;font-weight:700;cursor:pointer;';
+    bo.style.cssText='flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:"DM Sans",sans-serif;font-size:13px;font-weight:600;cursor:pointer;';
+  } else {
+    bo.style.cssText='flex:1;padding:10px;border-radius:10px;border:1px solid rgba(124,106,247,0.4);background:rgba(124,106,247,0.1);color:var(--accent4);font-family:"DM Sans",sans-serif;font-size:13px;font-weight:700;cursor:pointer;';
+    bt.style.cssText='flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:"DM Sans",sans-serif;font-size:13px;font-weight:600;cursor:pointer;';
+  }
+}
+
+function closeModal(){
+  document.getElementById('day-modal').style.display='none';
+  activeDay=null;
+}
+
+async function saveDay(){
+  if(!activeDay) return;
+  const meals=MEAL_LABELS.map((_,i)=>document.getElementById('meal-'+i).value.trim());
+  const note=document.getElementById('day-note').value.trim();
+  const data={type:activeDayType, meals, note};
+
+  // Spremi lokalno — uvijek radi
+  calCache[activeDay]=data;
+  saveLocalData();
+  renderCal();
+
+  const btn=document.getElementById('save-btn');
+  const status=document.getElementById('save-status');
+
+  if(!sheetsUrl){
+    status.textContent='✅ Spremljeno lokalno';
+    status.style.color='var(--accent)';
+    setTimeout(closeModal,1000);
+    return;
+  }
+
+  btn.textContent='Šaljem u Sheets...';
+  btn.style.opacity='0.7';
+  try {
+    const payload={date:activeDay, type:activeDayType, dorucak:meals[0], rucak:meals[1], meduobrok:meals[2], vecera:meals[3], note};
+    await fetch(sheetsUrl, {method:'POST', mode:'no-cors', body:JSON.stringify(payload)});
+    status.textContent='✅ Spremljeno lokalno + Google Sheets';
+    status.style.color='var(--accent)';
+  } catch(e){
+    status.textContent='✅ Lokalno ok · ⚠️ Sheets nedostupan';
+    status.style.color='var(--accent3)';
+  }
+  btn.textContent='💾 Spremi';
+  btn.style.opacity='1';
+  setTimeout(closeModal,1200);
+}
+
+// Override showScreen for calendar init
+const _origShow = window.showScreen;
+window.showScreen = function(n){
+  _origShow(n);
+  if(n==='suplementi') renderSupl();
+  if(n==='kalendar') initCalendar();
+};
+</script>
+</body>
+</html>
